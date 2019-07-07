@@ -10,6 +10,8 @@ from lib.models.users import User
 from lib.models.searched_results import SearchResults
 from lib.models.db import db_session
 
+from lib.core.config import get_config
+
 import requests
 import json
 
@@ -18,8 +20,8 @@ SECRET_KEY = 'development key'
 DEBUG = True
 
 # Set Github specifc values
-GITHUB_CLIENT_ID = '149c79bff7a73b8d8456'
-GITHUB_CLIENT_SECRET = '9144e244779a5047c7e22ff978821dc1a08639cd'
+GITHUB_CLIENT_ID = get_config()['github_client_id']
+GITHUB_CLIENT_SECRET = get_config()['github_client_secret']
 
 # setup flask
 app = Flask(__name__)
@@ -165,4 +167,9 @@ def delete_records():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(
+        host='0.0.0.0',
+        port=5000,
+        threaded=True,
+        debug=True
+    )

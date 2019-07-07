@@ -18,6 +18,8 @@ CONFIGS['DEV'] = {
     'port': 5000,
     'debug': True,
     'env': 'DEV',
+    'github_client_id': '149c79bff7a73b8d8456',
+    'github_client_secret': '9144e244779a5047c7e22ff978821dc1a08639cd'
 }
 
 
