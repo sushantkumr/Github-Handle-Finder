@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Github OAuth Sample Project</title>
+</head>
+<body>
+	<div class="container-fluid">
+		<p style="margin-top: 25px;">Welcome <a href='https://github.com/{{g.user.github_login}}' target="_blank" >{{g.user.github_login}}</a></p>
+    	<a href='{{ url_for("logout") }}' style="text-decoration: none;"><button type="button" class="btn btn-info float-right" style="margin-right: 50px;margin-top: 1px">Logout</button></a>		
+	</div>
+	<div class="container" style="max-width: 250px;">
+ 		<form action="/search">
+ 			<div style="display: flex;align-items: center;">
+    			<input type="text" name="search_term" placeholder="GitHub handle">
+    			<button type="submit" class="btn btn-primary" style="margin-left: 15px;">Search</button>
+  			</div>
+  			
+		</form>
+	</div>
+	<div class="container" style="max-width: 550px; margin-top: 50px;">
+		<h2>Previously Searched Records</h2>
+		<button type="button" class="btn btn-danger float-right" onclick="deleteRows();"
+		style="margin-bottom: 15px">Delete<small> (Select a record)</small></button>
+		<table id='resultDataTable' class="display dataTable dt-body-center" style="width: 100%;" role="grid" aria-describedby="example_info">
+			<thead>
+				<th>Username</th>
+				<th>Avatar</th>
+				<th>URL</th>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
+</body>
+
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/select/1.3.0/css/select.dataTables.min.css"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.3.0/js/dataTables.select.min.js"></script>
+
+<script type="text/javascript">
+	$(document).ready( function () {
+		const resultData = {{ previously_searched_rows|safe }};
+    	$('#resultDataTable').DataTable({
+    		'columns': [
+		        { 'data': 'login' },
+		        { 'data': 'avatar_url', render: function(data, type, full, meta) {
+		        	return '<img src="' + data + '" width="25" height="25">'
+	        		}  
+	        	},
+		        { 'data': 'html_url', render: function(data, type, full, meta) {
+		        	return '<a href="' + data + '" target=_blank>Profile</a>'
+	        		} 
+	        	},
+		    ],
+    		'data': resultData,
+			'select': {
+            	'style': 'multi'
+        	}
+    	});
+
+		window.deleteRows = function(){
+			const table = $('#resultDataTable').DataTable();
+		    selectedRows = table.rows('.selected')[0];
+	    	selected_rows_github_ids = []	    
+			table.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
+			    var data = this.data();
+			    if(selectedRows.includes(rowIdx)) {
+			    	selected_rows_github_ids.push(data['github_id'])
+			    }
+			});
+
+			if(selected_rows_github_ids.length != 0) {
+				host = 'http://' + window.location.host
+				url = host + '/delete_records';
+				data = {
+					'selected_rows_github_ids': selected_rows_github_ids
+				}
+				$.ajax({
+			        method: 'POST',
+			        contentType: 'application/json',
+			        url: url,
+			        data: JSON.stringify(data),
+			        success: (data, textStatus, xhr) => {
+			        	console.log(data, xhr)
+			            if (xhr.status == 200) {
+			    			window.location = "/";
+			            }
+			            else {
+			                console.log('Error: ' + data);
+			            }
+			        },
+			        error: function(a, b, c) {
+			            console.log(a, b, c);
+			        }
+				}); 				
+			} else {
+				alert('No rows selected for deletion')
+			}
+		}
+	});
+</script>
+</html>
