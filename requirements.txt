@@ -5,7 +5,7 @@ Flask==1.1.0
 Flask-Login==0.4.1
 Flask-SQLAlchemy==2.4.0
 GitHub-Flask==3.2.0
-httplib2==0.13.0
+httplib2==0.18.0
 idna==2.8
 itsdangerous==1.1.0
 Jinja2==2.10.1
